@@ -1,16 +1,11 @@
 GPS Sonar Bleep PWA Installation
 --------------------------------
 
-1. Create a project folder
-2. Place all these files in that folder
-3. For the icon files (in /icons/ folder), replace the placeholder PNGs with your actual app icons
-4. Serve the app using a local server:
-   - Python: python -m http.server 8000
-   - Node: npx serve
-5. Open in Chrome and install as PWA
-6. For production, deploy to a web host supporting HTTPS
-
-Required icon sizes:
-- icon-192.png: 192x192 pixels
-- icon-512.png: 512x512 pixels
-- icon-512-maskable.png: 512x512 with padding
+1. From Chrome or similar browser > add to Home Screen or Install App
+2. Start Audio to Check for Sound.
+3. If Sound is On, then
+4. Lock GPS Position.
+5. Move away from lock position and should gradually hear the Bleep getting slower.
+6. Adjust all other settings to your preferences.
+7. This is still in progress, however drop me a line for help or ideas:
+8. tokenomusic@gmail.com - tokeno.net
