@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,57 +73,6 @@
     }
     .control-item {
       min-width: 120px;
-    }
-    /* Compass Styles */
-    #compass {
-      width: 150px;
-      height: 150px;
-      margin: 20px auto;
-      position: relative;
-    }
-    #compass-circle {
-      width: 100%;
-      height: 100%;
-      border: 3px solid #0f0;
-      border-radius: 50%;
-      position: relative;
-    }
-    #compass-arrow {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50%;
-      height: 4px;
-      background: #f00;
-      transform-origin: left center;
-      transform: rotate(0deg) translateX(0);
-      transition: transform 0.5s ease-out;
-    }
-    #compass-arrow:after {
-      content: '';
-      position: absolute;
-      right: -10px;
-      top: -8px;
-      width: 0;
-      height: 0;
-      border-left: 10px solid #f00;
-      border-top: 10px solid transparent;
-      border-bottom: 10px solid transparent;
-    }
-    #compass-label {
-      position: absolute;
-      bottom: -25px;
-      width: 100%;
-      text-align: center;
-      color: #0f0;
-    }
-    .north-mark {
-      position: absolute;
-      top: 5px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #0f0;
-      font-weight: bold;
     }
   </style>
 </head>
@@ -217,20 +165,32 @@
     </div>
   </div>
 
+  
   <div class="panel">
-    <h2>Direction Compass</h2>
-    <div id="compass">
-      <div id="compass-circle">
-        <div class="north-mark">N</div>
-        <div id="compass-arrow"></div>
-      </div>
-      <div id="compass-label">Pointing to locked position</div>
+    <h2>Compass</h2>
+    <div id="compass" style="width: 100px; height: 100px; border: 2px solid #0f0; border-radius: 50%; margin: 0 auto; position: relative;">
+      
+      <div id="target-marker" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid red; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);"></div>
+
+      <div id="arrow" style="width: 2px; height: 50px; background: #0f0; position: absolute; top: 0; left: 50%; transform-origin: bottom center;"></div>
     </div>
   </div>
+
 
   <div id="debug"></div>
 
   <script>
+let deviceHeading = null;
+    window.addEventListener("deviceorientationabsolute", e => {
+      if (e.absolute && e.alpha !== null) {
+        deviceHeading = e.alpha;
+      }
+    }, true);
+    window.addEventListener("deviceorientation", e => {
+      if (deviceHeading === null && e.alpha !== null) {
+        deviceHeading = e.alpha;
+      }
+    }, true);
     class MIDIController {
       constructor() {
         this.midiAccess = null;
@@ -475,8 +435,8 @@
         this.movementHistory = this.movementHistory.filter(item => now - item.time < 3000);
         
         this.updateDisplay(distance, accuracy, speed);
+        this.updateCompass(latitude, longitude);
         this.updateAudioAndMIDI(distance);
-        this.updateCompass(latitude * Math.PI/180, longitude * Math.PI/180); // Convert to radians
       },
 
       calculateDistance: function(lat1, lon1, lat2, lon2) {
@@ -493,25 +453,25 @@
 
         return R * c;
       },
-
       updateCompass: function(currentLat, currentLon) {
         if (!this.lockPosition) return;
-        
-        // Calculate bearing from current position to locked position
-        const y = Math.sin(this.lockPosition.lon - currentLon) * Math.cos(this.lockPosition.lat);
-        const x = Math.cos(currentLat) * Math.sin(this.lockPosition.lat) - 
-                 Math.sin(currentLat) * Math.cos(this.lockPosition.lat) * 
-                 Math.cos(this.lockPosition.lon - currentLon);
-        let bearing = Math.atan2(y, x);
-        bearing = (bearing * 180 / Math.PI + 360) % 360; // Convert to degrees and normalize
-        
-        // Update compass arrow
-        const arrow = document.getElementById('compass-arrow');
-        arrow.style.transform = `rotate(${bearing}deg) translateX(0)`;
-        
-        // Update debug info
-        this.log(`Compass bearing: ${bearing.toFixed(1)}°`);
+        const toRadians = deg => deg * Math.PI / 180;
+        const toDegrees = rad => rad * 180 / Math.PI;
+        const dLon = toRadians(this.lockPosition.lon - currentLon);
+        const lat1 = toRadians(currentLat);
+        const lat2 = toRadians(this.lockPosition.lat);
+        const y = Math.sin(dLon) * Math.cos(lat2);
+        const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+        let bearing = (toDegrees(Math.atan2(y, x)) + 360) % 360;
+        if (deviceHeading !== null) {
+          bearing = (bearing - deviceHeading + 360) % 360;
+        }
+        const arrow = document.getElementById("arrow");
+        if (arrow) {
+          arrow.style.transform = `rotate(${bearing}deg)`;
+        }
       },
+
 
       updateAudioAndMIDI: function(currentDistance) {
         clearTimeout(this.bleepTimer);
@@ -611,7 +571,7 @@
 
       getValidFrequency: function() {
         const freq = parseFloat(document.getElementById("freqInput").value);
-        return Math.min(20000, Math.max(20, isNaN(freq) ? 800 : freq);
+        return Math.min(20000, Math.max(20, isNaN(freq) ? 800 : freq));
       },
 
       getValidMaxDistance: function() {
