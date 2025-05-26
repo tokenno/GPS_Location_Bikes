@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#111">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-capable" content="yes">
   <title>GPS Sonar Bleep with MIDI</title>
   <style>
     body {
@@ -75,10 +80,11 @@
       min-width: 120px;
     }
   </style>
+    
 </head>
 <body>
   <h1>GPS Sonar Bleep with MIDI</h1>
-  <p class="warning">TAP "TEST AUDIO" FIRST! THEN "CONNECT MIDI"</p>
+  <p class="warning">TAP "TEST AUDIO" FIRST! THEN "LOCK POSITION"</p>
 
   <div class="panel">
     <h2>Audio Setup</h2>
@@ -89,7 +95,7 @@
   </div>
 
   <div class="panel">
-    <h2>MIDI Setup</h2>
+    <h2>MIDI Setup - Desktop Only</h2>
     <div class="control-group">
       <button id="midiBtn" disabled>Connect MIDI</button>
       <select id="midiChannel">
@@ -603,5 +609,42 @@ let deviceHeading = null;
       }
     });
   </script>
+    <script>
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful');
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
+// Show install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show your custom install button here if you want
+  console.log('PWA install prompt available');
+});
+
+function showInstallPrompt() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted install');
+      } else {
+        console.log('User dismissed install');
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+</script>
 </body>
 </html>
