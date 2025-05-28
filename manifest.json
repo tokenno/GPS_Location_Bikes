@@ -1,9 +1,8 @@
 {
+ "name": "GPS Bike Finder",
+  "short_name": "BikeFinder",
   "description": "Find Bike Via GPS and Sound",
-  "start_url": "index.html"
-    "display": "standalone",
-  "background_color": "#f3f4f6",
-  "theme_color": "#3b82f6",
+  "start_url": "index.html",
   "icons": [
     {
       "src": "icon.png",
