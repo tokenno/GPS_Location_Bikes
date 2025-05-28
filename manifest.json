@@ -1,1 +1,4 @@
-{}
+{
+  "description": "Find Bike Via GPS and Sound",
+  "start_url": "index.html"
+}
